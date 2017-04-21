@@ -36,6 +36,7 @@ cache:
 
 env:
   global:
+    - COMPOSER_FLAGS="--no-interaction --optimize-autoloader"
     - PIMCORE_ENVIRONMENT=test
     - PIMCORE_TEST=1
     - PIMCORE_TEST_URL=http://pimcore-test.dev
@@ -45,6 +46,7 @@ env:
 before_install:
   - mysql --version
   - mysql -e "CREATE DATABASE pimcore_test;"
+  - composer global show -ND 2>&1 | grep "hirak/prestissimo" || travis_retry composer global require $COMPOSER_FLAGS hirak/prestissimo
 
 install:
   # add config templates
@@ -53,8 +55,8 @@ install:
   - cp app/config/parameters.example.yml app/config/parameters.yml
 
   # install composer - HHVM isn't officially PHP 7 compatible - see https://github.com/composer/composer/issues/4976
-  - if [[ "$TRAVIS_PHP_VERSION" != *"hhvm"* ]]; then composer install; fi
-  - if [[ "$TRAVIS_PHP_VERSION" == *"hhvm"* ]]; then composer install --ignore-platform-reqs; fi
+  - if [[ "$TRAVIS_PHP_VERSION" != *"hhvm"* ]]; then composer install $COMPOSER_FLAGS; fi
+  - if [[ "$TRAVIS_PHP_VERSION" == *"hhvm"* ]]; then composer install $COMPOSER_FLAGS --ignore-platform-reqs; fi
 
 before_script:
   - .travis/setup-php.sh
